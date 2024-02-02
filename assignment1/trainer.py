@@ -97,7 +97,7 @@ class BaseTrainer:
                     #print("Previous validation loss: ", prev_val_loss)
                     
                     if val_loss < prev_val_loss - tolerance:
-                        print(counter)
+                        #print(counter)
                         counter = 0
                         
                     else:
