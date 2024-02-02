@@ -13,6 +13,16 @@ def pre_process_images(X: np.ndarray):
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"
     # TODO implement this function (Task 2a)
+
+    #x_normalized = 2 * (x - min(x))/range(x) - 1
+    #First we normalize the images to the range [0, 2] 
+    #and then we shift the range to [-1, 1] by subtracting 1
+    X = 2 * (X - np.min(X)) / np.ptp(X) - 1
+
+    #We add a column of ones (with the same amount of rows as X) 
+    #to the second axis of X (corresponding to the columns of X)
+    X = np.append(X, np.ones((X.shape[0], 1)), axis=1)
+
     return X
 
 
@@ -27,14 +37,21 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
     # TODO implement this function (Task 2a)
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    return 0
+    
+    #Using Equation 3 from the assignment
+    batch_size = targets.shape[0]
+    loss_vector = (targets*np.log(outputs) + (1 - targets)*np.log(1 - outputs))
+
+    #We sum the loss vector and divide by the batch size to get the average loss
+    C_average = -np.sum(loss_vector)/batch_size
+    return C_average
 
 
 class BinaryModel:
 
     def __init__(self):
         # Define number of input nodes
-        self.I = None
+        self.I = 785  #Number of input nodes 
         self.w = np.zeros((self.I, 1))
         self.grad = None
 
@@ -46,7 +63,14 @@ class BinaryModel:
             y: output of model with shape [batch size, 1]
         """
         # TODO implement this function (Task 2a)
-        return None
+        
+        #Equation 1: p(x) = f(x) = 1/(1 + exp(-w^T * x)), w^T * x = np.sum(wi * xi)
+        #Calulate the probability vector p 
+        p = 1/(1 + np.exp(-np.dot(X, self.w)))
+        #print("The probability for each image is: ", p)
+        #print("Shape of p:", p.shape)          #Should be (batch size, 1)
+
+        return p
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
         """
@@ -62,6 +86,14 @@ class BinaryModel:
         self.grad = np.zeros_like(self.w)
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
+        
+        #Using equation 6 
+        batch_size = X.shape[0]
+        gradient_vector = -np.dot(X.T, (targets - outputs))
+
+        #We divide the gradient vector by the batch size to get the average gradient
+        self.grad = gradient_vector/batch_size
+
 
     def zero_grad(self) -> None:
         self.grad = None
