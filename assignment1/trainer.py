@@ -75,8 +75,7 @@ class BaseTrainer:
 
         global_step = 0
         counter = 0
-        prev_val_loss = np.inf
-        tolerance = 10e-6
+        prev_ten = []
         for epoch in range(num_epochs):
             train_loader = utils.batch_loader(
                 self.X_train, self.Y_train, self.batch_size, shuffle=self.shuffle_dataset)
@@ -93,22 +92,27 @@ class BaseTrainer:
                     val_history["accuracy"][global_step] = accuracy_val
 
                     #TODO (Task 2d): Implement early stopping here.
-                    #print("Validation loss: ", val_loss)
-                    #print("Previous validation loss: ", prev_val_loss)
                     
-                    if val_loss < prev_val_loss - tolerance:
-                        #print(counter)
-                        counter = 0
-                        
+                    if len(prev_ten) == 20:
+                        min_val = min(prev_ten)
+                        current = val_loss
+                        if current > min_val:
+                            counter += 1
+                            if counter == 20:
+                                print(f"Stopping at epoch  {epoch}")
+                                return train_history, val_history
+                        else:
+                            #print(counter)
+                            counter = 0
+                        prev_ten.pop(0)
+                        prev_ten.append(val_loss)
+
                     else:
-                        counter += 1
-                        if counter == 10:
-                            print("Early stopping at ", epoch, " epoch")
-                            return train_history, val_history
-                    prev_val_loss = val_loss
+                        prev_ten.append(val_loss)
+
+
                     # You can access the validation loss in val_history["loss"]
                 global_step += 1
-        print(prev_val_loss," ", val_loss)
         return train_history, val_history
 
 
