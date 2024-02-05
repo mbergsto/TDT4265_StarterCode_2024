@@ -75,7 +75,7 @@ class BaseTrainer:
 
         global_step = 0
         counter = 0
-        prev_ten = []
+        prev_losses = []
         for epoch in range(num_epochs):
             train_loader = utils.batch_loader(
                 self.X_train, self.Y_train, self.batch_size, shuffle=self.shuffle_dataset)
@@ -93,8 +93,8 @@ class BaseTrainer:
 
                     #TODO (Task 2d): Implement early stopping here.
                     
-                    if len(prev_ten) == 20:
-                        min_val = min(prev_ten)
+                    if len(prev_losses) == 20:
+                        min_val = min(prev_losses)
                         current = val_loss
                         if current > min_val:
                             counter += 1
@@ -104,11 +104,11 @@ class BaseTrainer:
                         else:
                             #print(counter)
                             counter = 0
-                        prev_ten.pop(0)
-                        prev_ten.append(val_loss)
+                        prev_losses.pop(0)
+                        prev_losses.append(val_loss)
 
                     else:
-                        prev_ten.append(val_loss)
+                        prev_losses.append(val_loss)
 
 
                     # You can access the validation loss in val_history["loss"]
