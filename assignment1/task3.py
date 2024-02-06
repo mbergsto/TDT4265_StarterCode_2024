@@ -17,8 +17,17 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: SoftmaxModel) 
         Accuracy (float)
     """
     # TODO: Implement this function (task 3c)
-    accuracy = 0
-    return accuracy
+    accuracy = 0.0
+    output = model.forward(X)
+    #print(output.shape)
+    for i in range(len(output)):
+        if np.argmax(output[i]) == np.argmax(targets[i]):
+            accuracy += 1
+    
+    accuracy_percentage = accuracy / len(targets)
+    
+    return accuracy_percentage
+
 
 
 class SoftmaxTrainer(BaseTrainer):
@@ -110,7 +119,7 @@ def main():
     plt.show()
 
     # Plot accuracy
-    plt.ylim([0.89, .93])
+    plt.ylim([0.69, .93])
     utils.plot_loss(train_history["accuracy"], "Training Accuracy")
     utils.plot_loss(val_history["accuracy"], "Validation Accuracy")
     plt.xlabel("Number of Training Steps")
