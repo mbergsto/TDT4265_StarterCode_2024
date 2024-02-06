@@ -108,25 +108,25 @@ def main():
     print("Final Train accuracy:", calculate_accuracy(X_train, Y_train, model))
     print("Final Validation accuracy:", calculate_accuracy(X_val, Y_val, model))
 
-    plt.ylim([0.2, .8])
-    utils.plot_loss(train_history["loss"],
-                    "Training Loss", npoints_to_average=10)
-    utils.plot_loss(val_history["loss"], "Validation Loss")
-    plt.legend()
-    plt.xlabel("Number of Training Steps")
-    plt.ylabel("Cross Entropy Loss - Average")
-    plt.savefig("task3b_softmax_train_loss.png")
-    plt.show()
+    # plt.ylim([0.2, .8])
+    # utils.plot_loss(train_history["loss"],
+    #                 "Training Loss", npoints_to_average=10)
+    # utils.plot_loss(val_history["loss"], "Validation Loss")
+    # plt.legend()
+    # plt.xlabel("Number of Training Steps")
+    # plt.ylabel("Cross Entropy Loss - Average")
+    # plt.savefig("task3b_softmax_train_loss.png")
+    # plt.show()
 
-    # Plot accuracy
-    plt.ylim([0.69, .93])
-    utils.plot_loss(train_history["accuracy"], "Training Accuracy")
-    utils.plot_loss(val_history["accuracy"], "Validation Accuracy")
-    plt.xlabel("Number of Training Steps")
-    plt.ylabel("Accuracy")
-    plt.legend()
-    plt.savefig("task3b_softmax_train_accuracy.png")
-    plt.show()
+    # # Plot accuracy
+    # plt.ylim([0.69, .93])
+    # utils.plot_loss(train_history["accuracy"], "Training Accuracy")
+    # utils.plot_loss(val_history["accuracy"], "Validation Accuracy")
+    # plt.xlabel("Number of Training Steps")
+    # plt.ylabel("Accuracy")
+    # plt.legend()
+    # plt.savefig("task3b_softmax_train_accuracy.png")
+    # plt.show()
 
     # Train a model with L2 regularization (task 4b)
 
@@ -137,13 +137,37 @@ def main():
     )
     train_history_reg01, val_history_reg01 = trainer.train(num_epochs)
     # You can finish the rest of task 4 below this point.
-
+    # np.save("task4b_softmax_weight_lambdazero.npy", model.w)
+    # np.save("task4b_softmax_weight.npy", model1.w)
     # Plotting of softmax weights (Task 4b)
-    # plt.imsave("task4b_softmax_weight.png", weight, cmap="gray")
+
+    #Remove bias
+    w1 = model.w[1:, :]
+    w2 = model1.w[1:, :]
+    w1_matrix = w1.reshape(28, 28, 10)
+    w2_matrix = w2.reshape(28, 28, 10)
+    
+        
+    plt.imsave("task4b_softmax_weight_lambdazero.png", w1_matrix, cmap="gray")
+    plt.imsave("task4b_softmax_weight.png", w2_matrix, cmap="gray")
 
     # Plotting of accuracy for difference values of lambdas (task 4c)
     l2_lambdas = [1, .1, .01, .001]
-    plt.savefig("task4c_l2_reg_accuracy.png")
+
+    # for l2_lambda in l2_lambdas:
+    #     model = SoftmaxModel(l2_lambda)
+    #     trainer = SoftmaxTrainer(
+    #         model, learning_rate, batch_size, shuffle_dataset,
+    #         X_train, Y_train, X_val, Y_val,
+    #     )
+    #     train_history, val_history = trainer.train(num_epochs)
+    #     utils.plot_loss(val_history["accuracy"], "Training Accuracy, lambda = " + str(l2_lambda))
+
+    # plt.xlabel("Number of Training Steps")
+    # plt.ylabel("Accuracy")
+    # plt.legend()
+    # plt.savefig("task4c_l2_reg_accuracy.png")
+    # plt.show()
 
     # Task 4d - Plotting of the l2 norm for each weight
 

@@ -69,8 +69,10 @@ class SoftmaxModel:
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
 
-        gradient = - np.dot(X.T, (targets - outputs)) / X.shape[0]
-        self.grad = gradient
+        gradient_ce = - np.dot(X.T, (targets - outputs)) / X.shape[0]
+        gradient_reg = 2 * self.l2_reg_lambda * self.w
+
+        self.grad = gradient_ce + gradient_reg
 
     def zero_grad(self) -> None:
         self.grad = None
