@@ -141,15 +141,30 @@ def main():
     # np.save("task4b_softmax_weight.npy", model1.w)
     # Plotting of softmax weights (Task 4b)
 
-    #Remove bias
+    # Remove bias
     w1 = model.w[1:, :]
     w2 = model1.w[1:, :]
+
+    # Reshape the weights into a 3D tensor [28, 28, 10]
     w1_matrix = w1.reshape(28, 28, 10)
     w2_matrix = w2.reshape(28, 28, 10)
+
+    # # Create a single image with all 10 digits horizontally
+    # all_digits_combined_w1 = np.concatenate([w1_matrix[:, :, class_idx] for class_idx in range(10)], axis=1)
+    # all_digits_combined_w2 = np.concatenate([w2_matrix[:, :, class_idx] for class_idx in range(10)], axis=1)    
+    # # Save the combined image with all 10 digits
+    # plt.imsave("task4b_softmax_weight_lambdazero_all_digits.png", all_digits_combined_w1, cmap="gray")
+    # plt.imsave("task4b_softmax_weight_all_digits.png", all_digits_combined_w2, cmap="gray") 
+
+    figure, axes = plt.subplots(2, 10, figsize=(10, 2))
+    for i in range(10):
+        axes[0, i].imshow(w1_matrix[:, :, i], cmap="gray")
+        axes[0, i].axis('off')
+        axes[1, i].imshow(w2_matrix[:, :, i], cmap="gray")
+        axes[1, i].axis('off')
     
-        
-    plt.imsave("task4b_softmax_weight_lambdazero.png", w1_matrix, cmap="gray")
-    plt.imsave("task4b_softmax_weight.png", w2_matrix, cmap="gray")
+    plt.savefig("task4b_softmax_weight.png")
+
 
     # Plotting of accuracy for difference values of lambdas (task 4c)
     l2_lambdas = [1, .1, .01, .001]
