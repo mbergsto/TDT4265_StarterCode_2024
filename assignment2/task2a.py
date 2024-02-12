@@ -14,9 +14,19 @@ def pre_process_images(X: np.ndarray):
     """
     assert X.shape[1] == 784, f"X.shape[1]: {X.shape[1]}, should be 784"
     # TODO implement this function (Task 2a)
+    # Find mean and standarddeviation for the whole dataset
+    mean = np.mean(X)
+    std = np.std(X)
+    print("Mean: ", mean, " \nStd: ", std)
+    # Normalize the dataset
+    X = (X - mean) / std
+    # Add a column of ones to the data
+    ones = np.ones((X.shape[0], 1))
+    X = np.hstack((X, ones))
+    
+
     return X
-
-
+ 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
     """
     Args:
@@ -29,7 +39,8 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
         targets.shape == outputs.shape
     ), f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
     # TODO: Implement this function (copy from last assignment)
-    raise NotImplementedError
+    cross_entropy_error = - np.sum(targets * np.log(outputs)) / targets.shape[0]
+    return cross_entropy_error
 
 
 class SoftmaxModel:
@@ -113,7 +124,13 @@ def one_hot_encode(Y: np.ndarray, num_classes: int):
         Y: shape [Num examples, num classes]
     """
     # TODO: Implement this function (copy from last assignment)
-    raise NotImplementedError
+    num_examples = Y.shape[0]
+    Y_one_hot = np.zeros((num_examples, num_classes))
+    for i in range(num_examples):
+        class_index = int(Y[i])
+        Y_one_hot[i, class_index] = 1
+    return Y_one_hot
+
 
 
 def gradient_approximation_test(model: SoftmaxModel, X: np.ndarray, Y: np.ndarray):
@@ -164,6 +181,7 @@ def main():
 
     X_train, Y_train, *_ = utils.load_full_mnist()
     X_train = pre_process_images(X_train)
+
     Y_train = one_hot_encode(Y_train, 10)
     assert (
         X_train.shape[1] == 785
