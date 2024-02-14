@@ -60,18 +60,12 @@ class SoftmaxTrainer(BaseTrainer):
             loss value (float) on batch
         """
         # TODO: Implement this function (task 2c)
-        # Initialize the weights and biases
-        #self.w = np.random.uniform(-1, 1, (785, 64))
-        
-
         outputs = self.model.forward(X_batch)
         self.model.backward(X_batch, outputs, Y_batch)
-        
         
         self.model.ws[0] -= self.learning_rate * self.model.grads[0]
         self.model.ws[1] -= self.learning_rate * self.model.grads[1]
         
-
         loss = cross_entropy_loss(Y_batch, outputs)
         
         # for layer_idx in range(len(self.model.ws)):

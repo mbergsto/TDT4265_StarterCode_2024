@@ -70,14 +70,17 @@ class SoftmaxModel:
         # Initialize the weights
         self.ws = []
         prev = self.I
-        for size in self.neurons_per_layer:
-            prev += 1  # +1 for the bias trick - EDITED
-            w_shape = (prev, size)
-            print("Initializing weight to shape:", w_shape)
-            w = np.zeros(w_shape)
-            self.ws.append(w)
-            prev = size
-        print("Initialized weights:", len(self.ws))
+        # Given code
+        # for size in self.neurons_per_layer:
+        #     prev += 1  # +1 for the bias trick - EDITED
+        #     w_shape = (prev, size)
+        #     print("Initializing weight to shape:", w_shape)
+        #     w = np.zeros(w_shape)
+        #     self.ws.append(w)
+        #     prev = size
+
+
+        #Edited
         self.ws = [np.random.uniform(-1, 1, (785, 64)), np.random.uniform(-1, 1, (65, 10))]
         self.grads = [None for i in range(len(self.ws))]
 
@@ -92,16 +95,21 @@ class SoftmaxModel:
         # HINT: For performing the backward pass, you can save intermediate activations in variables in the forward pass.
         # such as self.hidden_layer_output = ...
 
-        W_hidden = self.ws[0].T
-        W_output = self.ws[1].T
+        # Dimensions. including bias:
+        #I - Input Layer (785), J - Hidden Layer (65), 
+        # K - Output Layer (10), N - Batch size 
+        W_hidden = self.ws[0].T      #[64, 785]
+        W_output = self.ws[1].T      #[10, 65] 
         
-        self.z_hidden = W_hidden @ X.T
-        self.a_hidden = sigmoid(self.z_hidden)
-        self.a_hidden = np.append(self.a_hidden, np.ones((1, self.a_hidden.shape[1])), axis=0)
-        self.z_output = W_output @ self.a_hidden
-        yhat = np.exp(self.z_output) / np.sum(np.exp(self.z_output), axis=0)
+        self.z_hidden = W_hidden @ X.T                                                              #[64, 785] @ [785, N] = [64, N] 
+        self.a_hidden = sigmoid(self.z_hidden)                                                      #[64, N]
         
-        return yhat.T
+        self.a_hidden = np.append(self.a_hidden, np.ones((1, self.a_hidden.shape[1])), axis=0)      #[65, N]
+        
+        self.z_output = W_output @ self.a_hidden                                                    #[10, 65] @ [65, N] = [10, N]
+        yhat = np.exp(self.z_output) / np.sum(np.exp(self.z_output), axis=0)                        #[10, N]
+        
+        return yhat.T                                                                               #[N, 10]                    
 
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
@@ -120,23 +128,22 @@ class SoftmaxModel:
         # A list of gradients.
         # For example, self.grads[0] will be the gradient for the first hidden layer
 
-        W_output = self.ws[1].T  # Remove the bias from the output layer  #[10, 65]
-        W_output_tilde = W_output[:, : -1]  #[10, 64]
-        N = X.shape[0]
-        y_hat = outputs.T
-        y = targets.T
-        delta_output = y_hat - y
-        #print("W_output_tilde:",(W_output_tilde.shape))
-        #print("delta_k:",delta_output.shape)
-        #print("W_output_tilde.T @ delta_output:",(W_output_tilde.T @ delta_output).shape)
-        #print("sigmoid_derivative:",sigmoid_derivative(self.z_hidden).shape)
-        delta_hidden = (W_output_tilde.T @ delta_output) * sigmoid_derivative(self.z_hidden)
-        #print("delta_h:",delta_hidden.shape)
-        gradient_hidden = (delta_hidden @ X) / N
-        #print("a_hidden:",self.a_hidden.shape)
-        gradient_output = (delta_output @ self.a_hidden.T) / N
-        self.grads[0] = gradient_hidden.T
-        self.grads[1] = gradient_output.T
+        W_output = self.ws[1].T                         #[10, 65]
+        W_output_tilde = W_output[:, : -1]              #[10, 64] # Remove the bias from the output layer
+        N = X.shape[0]                                  #Batch size
+
+        y_hat = outputs.T                               #[10, N]
+        y = targets.T                                   #[10, N]
+
+        delta_output = y_hat - y                                                                    #[10, N]        
+        delta_hidden = (W_output_tilde.T @ delta_output) * sigmoid_derivative(self.z_hidden)        #[64, 10] @ [10, N] = [64, N]
+        
+        gradient_hidden = (delta_hidden @ X) / N                                                    #[64, N] @ [N, 785] = [64, 785]
+        gradient_output = (delta_output @ self.a_hidden.T) / N                                      #[10, N] @ [N, 65] = [10, 65]
+
+        self.grads[0] = gradient_hidden.T                                                           #[785, 64]
+        self.grads[1] = gradient_output.T                                                           #[65, 10]    
+              
         
         
         for grad, w in zip(self.grads, self.ws):
