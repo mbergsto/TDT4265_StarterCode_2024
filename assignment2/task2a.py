@@ -57,7 +57,7 @@ class SoftmaxModel:
             1
         )  # Always reset random seed before weight init to get comparable results.
         # Define number of input nodes
-        self.I = None
+        self.I = 784  # Number of input nodes
         self.use_improved_sigmoid = use_improved_sigmoid
         self.use_relu = use_relu
         self.use_improved_weight_init = use_improved_weight_init
@@ -71,11 +71,14 @@ class SoftmaxModel:
         self.ws = []
         prev = self.I
         for size in self.neurons_per_layer:
+            prev += 1  # +1 for the bias trick - EDITED
             w_shape = (prev, size)
             print("Initializing weight to shape:", w_shape)
             w = np.zeros(w_shape)
             self.ws.append(w)
             prev = size
+        print("Initialized weights:", len(self.ws))
+        self.ws = [np.random.uniform(-1, 1, (785, 64)), np.random.uniform(-1, 1, (65, 10))]
         self.grads = [None for i in range(len(self.ws))]
 
     def forward(self, X: np.ndarray) -> np.ndarray:
@@ -88,7 +91,18 @@ class SoftmaxModel:
         # TODO implement this function (Task 2b)
         # HINT: For performing the backward pass, you can save intermediate activations in variables in the forward pass.
         # such as self.hidden_layer_output = ...
-        return None
+
+        W_hidden = self.ws[0].T
+        W_output = self.ws[1].T
+        
+        self.z_hidden = W_hidden @ X.T
+        self.a_hidden = sigmoid(self.z_hidden)
+        self.a_hidden = np.append(self.a_hidden, np.ones((1, self.a_hidden.shape[1])), axis=0)
+        self.z_output = W_output @ self.a_hidden
+        yhat = np.exp(self.z_output) / np.sum(np.exp(self.z_output), axis=0)
+        
+        return yhat.T
+
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
         """
@@ -105,7 +119,26 @@ class SoftmaxModel:
         ), f"Output shape: {outputs.shape}, targets: {targets.shape}"
         # A list of gradients.
         # For example, self.grads[0] will be the gradient for the first hidden layer
-        self.grads = []
+
+        W_output = self.ws[1].T  # Remove the bias from the output layer  #[10, 65]
+        W_output_tilde = W_output[:, : -1]  #[10, 64]
+        N = X.shape[0]
+        y_hat = outputs.T
+        y = targets.T
+        delta_output = y_hat - y
+        #print("W_output_tilde:",(W_output_tilde.shape))
+        #print("delta_k:",delta_output.shape)
+        #print("W_output_tilde.T @ delta_output:",(W_output_tilde.T @ delta_output).shape)
+        #print("sigmoid_derivative:",sigmoid_derivative(self.z_hidden).shape)
+        delta_hidden = (W_output_tilde.T @ delta_output) * sigmoid_derivative(self.z_hidden)
+        #print("delta_h:",delta_hidden.shape)
+        gradient_hidden = (delta_hidden @ X) / N
+        #print("a_hidden:",self.a_hidden.shape)
+        gradient_output = (delta_output @ self.a_hidden.T) / N
+        self.grads[0] = gradient_hidden.T
+        self.grads[1] = gradient_output.T
+        
+        
         for grad, w in zip(self.grads, self.ws):
             assert (
                 grad.shape == w.shape
@@ -114,6 +147,12 @@ class SoftmaxModel:
     def zero_grad(self) -> None:
         self.grads = [None for i in range(len(self.ws))]
 
+
+def sigmoid(z: np.ndarray) -> np.ndarray:
+    return 1 / (1 + np.exp(-z))
+
+def sigmoid_derivative(z: np.ndarray) -> np.ndarray:
+    return sigmoid(z) * (1 - sigmoid(z))
 
 def one_hot_encode(Y: np.ndarray, num_classes: int):
     """

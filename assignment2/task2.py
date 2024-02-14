@@ -19,8 +19,16 @@ def calculate_accuracy(
         Accuracy (float)
     """
     # TODO: Implement this function (copy from last assignment)
-    accuracy = 0
-    return accuracy
+    accuracy = 0.0
+    output = model.forward(X)
+    #print(output.shape)
+    for i in range(len(output)):
+        if np.argmax(output[i]) == np.argmax(targets[i]):
+            accuracy += 1
+    
+    accuracy_percentage = accuracy / len(targets)
+    
+    return accuracy_percentage
 
 
 class SoftmaxTrainer(BaseTrainer):
@@ -52,12 +60,22 @@ class SoftmaxTrainer(BaseTrainer):
             loss value (float) on batch
         """
         # TODO: Implement this function (task 2c)
+        # Initialize the weights and biases
+        #self.w = np.random.uniform(-1, 1, (785, 64))
+        
 
-        loss = 0
+        outputs = self.model.forward(X_batch)
+        self.model.backward(X_batch, outputs, Y_batch)
+        
+        
+        self.model.ws[0] -= self.learning_rate * self.model.grads[0]
+        self.model.ws[1] -= self.learning_rate * self.model.grads[1]
+        
 
-            self.model.ws[layer_idx] = (
-                self.model.ws[layer_idx] - self.learning_rate * grad
-        loss=cross_entropy_loss(Y_batch, logits)  # sol
+        loss = cross_entropy_loss(Y_batch, outputs)
+        
+        # for layer_idx in range(len(self.model.ws)):
+        #     self.model.ws[layer_idx] = self.model.ws[layer_idx] - self.learning_rate * self.model.grads[layer_idx]
 
         return loss
 
