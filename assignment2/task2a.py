@@ -69,7 +69,7 @@ class SoftmaxModel:
 
         # Initialize the weights
         self.ws = []
-        prev = self.I
+        #prev = self.I
         # Given code
         # for size in self.neurons_per_layer:
         #     prev += 1  # +1 for the bias trick - EDITED
@@ -81,7 +81,11 @@ class SoftmaxModel:
 
 
         #Edited
-        self.ws = [np.random.uniform(-1, 1, (785, 64)), np.random.uniform(-1, 1, (65, 10))]
+        if use_improved_weight_init:
+            self.ws = [np.random.normal(0, 1/np.sqrt(self.I), (785, 64)), np.random.normal(0, 1/np.sqrt(64), (65, 10))]
+        else:
+            self.ws = [np.random.uniform(-1, 1, (785, 64)), np.random.uniform(-1, 1, (65, 10))]
+        
         self.grads = [None for i in range(len(self.ws))]
 
     def forward(self, X: np.ndarray) -> np.ndarray:
@@ -102,7 +106,7 @@ class SoftmaxModel:
         W_output = self.ws[1].T      #[10, 65] 
         
         self.z_hidden = W_hidden @ X.T                                                              #[64, 785] @ [785, N] = [64, N] 
-        self.a_hidden = sigmoid(self.z_hidden)                                                      #[64, N]
+        self.a_hidden = self.sigmoid(self.z_hidden)                                                      #[64, N]
         
         self.a_hidden = np.append(self.a_hidden, np.ones((1, self.a_hidden.shape[1])), axis=0)      #[65, N]
         
@@ -136,7 +140,7 @@ class SoftmaxModel:
         y = targets.T                                   #[10, N]
 
         delta_output = y_hat - y                                                                    #[10, N]        
-        delta_hidden = (W_output_tilde.T @ delta_output) * sigmoid_derivative(self.z_hidden)        #[64, 10] @ [10, N] = [64, N]
+        delta_hidden = (W_output_tilde.T @ delta_output) * self.sigmoid_derivative(self.z_hidden)        #[64, 10] @ [10, N] = [64, N]
         
         gradient_hidden = (delta_hidden @ X) / N                                                    #[64, N] @ [N, 785] = [64, 785]
         gradient_output = (delta_output @ self.a_hidden.T) / N                                      #[10, N] @ [N, 65] = [10, 65]
@@ -155,11 +159,18 @@ class SoftmaxModel:
         self.grads = [None for i in range(len(self.ws))]
 
 
-def sigmoid(z: np.ndarray) -> np.ndarray:
-    return 1 / (1 + np.exp(-z))
+    def sigmoid(self, z: np.ndarray) -> np.ndarray:
+        return 1 / (1 + np.exp(-z))
 
-def sigmoid_derivative(z: np.ndarray) -> np.ndarray:
-    return sigmoid(z) * (1 - sigmoid(z))
+    def improved_sigmoid(self, z: np.ndarray) -> np.ndarray:
+        return 1.7159 * np.tanh(2/3 * z)
+
+    def sigmoid_derivative(self, z: np.ndarray) -> np.ndarray:
+        if self.use_improved_sigmoid:
+            return 1.7159 * 2/3 * (1 - np.tanh(2/3 * z)**2)
+        
+        sigmoid = self.sigmoid(z)
+        return sigmoid * (1 - sigmoid)
 
 def one_hot_encode(Y: np.ndarray, num_classes: int):
     """

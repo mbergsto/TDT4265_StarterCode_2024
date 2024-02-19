@@ -71,7 +71,8 @@ class BaseTrainer:
             loss={},
             accuracy={}
         )
-
+        prev_losses = []
+        counter = 0
         global_step = 0
         for epoch in range(num_epochs):
             train_loader = utils.batch_loader(
@@ -88,5 +89,22 @@ class BaseTrainer:
                     val_history["loss"][global_step] = val_loss
                     val_history["accuracy"][global_step] = accuracy_val
                     # TODO: Implement early stopping (copy from last assignment)
+                    #Comparing to the last 3 validation losses, instead of 20 as last assignment
+                    if len(prev_losses) == 3:
+                        min_val = min(prev_losses)
+                        current = val_loss
+                        if current > min_val:
+                            counter += 1
+                            if counter == 3:
+                                print(f"Stopping at epoch  {epoch}")
+                                return train_history, val_history
+                        else:
+                            #print(counter)
+                            counter = 0
+                        prev_losses.pop(0)
+                        prev_losses.append(val_loss)
+
+                    else:
+                        prev_losses.append(val_loss)
                 global_step += 1
         return train_history, val_history
