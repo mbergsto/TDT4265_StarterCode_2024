@@ -82,9 +82,9 @@ class SoftmaxModel:
 
         #Edited
         if use_improved_weight_init:
-            self.ws = [np.random.normal(0, 1/np.sqrt(self.I), (785, 64)), np.random.normal(0, 1/np.sqrt(64), (65, 10))]
+            self.ws = [np.random.normal(0, 1/np.sqrt(self.I), (785, neurons_per_layer[0])), np.random.normal(0, 1/np.sqrt(neurons_per_layer[0]), (neurons_per_layer[0]+1, 10))]
         else:
-            self.ws = [np.random.uniform(-1, 1, (785, 64)), np.random.uniform(-1, 1, (65, 10))]
+            self.ws = [np.random.uniform(-1, 1, (785, neurons_per_layer[0])), np.random.uniform(-1, 1, (neurons_per_layer[0]+1, 10))]
         
         self.grads = [None for i in range(len(self.ws))]
 
@@ -106,7 +106,7 @@ class SoftmaxModel:
         W_output = self.ws[1].T      #[10, 65] 
         
         self.z_hidden = W_hidden @ X.T                                                              #[64, 785] @ [785, N] = [64, N] 
-        self.a_hidden = self.sigmoid(self.z_hidden)                                                      #[64, N]
+        self.a_hidden = self.sigmoid(self.z_hidden)                                                 #[64, N]
         
         self.a_hidden = np.append(self.a_hidden, np.ones((1, self.a_hidden.shape[1])), axis=0)      #[65, N]
         

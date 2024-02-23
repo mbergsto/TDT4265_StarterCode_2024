@@ -49,9 +49,7 @@ class BaseTrainer:
         """
         pass
 
-    def train(
-            self,
-            num_epochs: int):
+    def train(self, num_epochs: int, early_stopping_threshold: int = 10):
         """
         Training loop for model.
         Implements stochastic gradient descent with num_epochs passes over the train dataset.
@@ -63,20 +61,13 @@ class BaseTrainer:
         num_batches_per_epoch = self.X_train.shape[0] // self.batch_size
         num_steps_per_val = num_batches_per_epoch // 5
         # A tracking value of loss over all training steps
-        train_history = dict(
-            loss={},
-            accuracy={}
-        )
-        val_history = dict(
-            loss={},
-            accuracy={}
-        )
-        prev_losses = []
+        train_history = dict(loss={}, accuracy={})
+        val_history = dict(loss={}, accuracy={})
+        best_val_loss = float('inf')
         counter = 0
         global_step = 0
         for epoch in range(num_epochs):
-            train_loader = utils.batch_loader(
-                self.X_train, self.Y_train, self.batch_size, shuffle=self.shuffle_dataset)
+            train_loader = utils.batch_loader(self.X_train, self.Y_train, self.batch_size, shuffle=self.shuffle_dataset)
             for X_batch, Y_batch in iter(train_loader):
                 loss = self.train_step(X_batch, Y_batch)
                 # Track training loss continuously
@@ -88,23 +79,17 @@ class BaseTrainer:
                     train_history["accuracy"][global_step] = accuracy_train
                     val_history["loss"][global_step] = val_loss
                     val_history["accuracy"][global_step] = accuracy_val
-                    # TODO: Implement early stopping (copy from last assignment)
-                    #Comparing to the last 3 validation losses, instead of 20 as last assignment
-                    if len(prev_losses) == 3:
-                        min_val = min(prev_losses)
-                        current = val_loss
-                        if current > min_val:
-                            counter += 1
-                            if counter == 3:
-                                print(f"Stopping at epoch  {epoch}")
-                                return train_history, val_history
-                        else:
-                            #print(counter)
-                            counter = 0
-                        prev_losses.pop(0)
-                        prev_losses.append(val_loss)
-
+                    
+                    # Early stopping
+                    if val_loss < best_val_loss:
+                        best_val_loss = val_loss
+                        counter = 0
                     else:
-                        prev_losses.append(val_loss)
+                        counter += 1
+                    if counter >= early_stopping_threshold:
+                        print(f"Early stopping at epoch {epoch}")
+                        return train_history, val_history
+                        
                 global_step += 1
         return train_history, val_history
+

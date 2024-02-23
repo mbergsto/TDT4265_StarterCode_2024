@@ -47,11 +47,12 @@ def main():
 
         # Plot loss
         plt.subplot(1, 2, 1)
-        utils.plot_loss(train_history["loss"], "Training loss - " + name)
-        utils.plot_loss(val_history["loss"], "Validation loss - " + name)
+        utils.plot_loss(train_history["loss"], "Training loss - " + name, npoints_to_average=10)
+        utils.plot_loss(val_history["loss"], "Validation loss - " + name, npoints_to_average=10)
         plt.ylabel("Cross Entropy Loss")
         plt.xlabel("Number of Training Steps")
-        plt.legend()
+        plt.ylim([0.0, .5])
+        #plt.legend()
         plt.grid(True)
         
 
@@ -60,6 +61,7 @@ def main():
         utils.plot_loss(val_history["accuracy"], "Validation accuracy - " + name)
         plt.ylabel("Accuracy")
         plt.xlabel("Number of Training Steps")
+        plt.ylim([0.85, 1.0])
         plt.legend()
         plt.grid(True)
     
