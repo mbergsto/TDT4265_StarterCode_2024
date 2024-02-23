@@ -81,12 +81,23 @@ class SoftmaxModel:
 
 
         #Edited
+         
         if use_improved_weight_init:
-            self.ws = [np.random.normal(0, 1/np.sqrt(self.I), (785, neurons_per_layer[0])), np.random.normal(0, 1/np.sqrt(neurons_per_layer[0]), (neurons_per_layer[0]+1, 10))]
+            self.ws = [np.random.normal(0, 1/np.sqrt(self.I), (785, neurons_per_layer[0]))]  
+            for i in range(1, len(neurons_per_layer)):
+                w = np.random.normal(0, 1/np.sqrt(neurons_per_layer[i-1]), (neurons_per_layer[i-1]+1, neurons_per_layer[i]))  
+                self.ws.append(w)
         else:
-            self.ws = [np.random.uniform(-1, 1, (785, neurons_per_layer[0])), np.random.uniform(-1, 1, (neurons_per_layer[0]+1, 10))]
-        
+            self.ws = [np.random.uniform(-1, 1, (785, neurons_per_layer[0]))]  
+            for i in range(1, len(neurons_per_layer)):
+                w = np.random.uniform(-1, 1, (neurons_per_layer[i-1]+1, neurons_per_layer[i]))  
+                self.ws.append(w)
+
+
+        #print("Weigths length: ", len(self.ws))
+          
         self.grads = [None for i in range(len(self.ws))]
+
 
     def forward(self, X: np.ndarray) -> np.ndarray:
         """
@@ -99,21 +110,43 @@ class SoftmaxModel:
         # HINT: For performing the backward pass, you can save intermediate activations in variables in the forward pass.
         # such as self.hidden_layer_output = ...
 
+        #Before 4c:
+
         # Dimensions. including bias:
         #I - Input Layer (785), J - Hidden Layer (65), 
         # K - Output Layer (10), N - Batch size 
-        W_hidden = self.ws[0].T      #[64, 785]
-        W_output = self.ws[1].T      #[10, 65] 
+        # W_hidden = self.ws[0].T      #[64, 785]
+        # W_output = self.ws[1].T      #[10, 65] 
         
-        self.z_hidden = W_hidden @ X.T                                                              #[64, 785] @ [785, N] = [64, N] 
-        self.a_hidden = self.sigmoid(self.z_hidden)                                                 #[64, N]
+        # self.z_hidden = W_hidden @ X.T                                                              #[64, 785] @ [785, N] = [64, N] 
+        # self.a_hidden = self.sigmoid(self.z_hidden)                                                 #[64, N]
         
-        self.a_hidden = np.append(self.a_hidden, np.ones((1, self.a_hidden.shape[1])), axis=0)      #[65, N]
+        # self.a_hidden = np.append(self.a_hidden, np.ones((1, self.a_hidden.shape[1])), axis=0)      #[65, N]
         
-        self.z_output = W_output @ self.a_hidden                                                    #[10, 65] @ [65, N] = [10, N]
-        yhat = np.exp(self.z_output) / np.sum(np.exp(self.z_output), axis=0)                        #[10, N]
+        # self.z_output = W_output @ self.a_hidden                                                    #[10, 65] @ [65, N] = [10, N]
+        # yhat = np.exp(self.z_output) / np.sum(np.exp(self.z_output), axis=0)                        #[10, N]
         
-        return yhat.T                                                                               #[N, 10]                    
+        # return yhat.T                                                                               #[N, 10]    
+
+        # Task 4c:
+        self.hidden_layer_input = []
+        self.hidden_layer_output = []
+        self.num_hidden_layers = len(self.neurons_per_layer) - 1
+        
+        for i in range(self.num_hidden_layers):
+
+            z_j = X @ self.ws[i]
+            self.hidden_layer_input.append(z_j)
+            a_j = self.sigmoid(z_j)
+            self.hidden_layer_output.append(a_j)
+            #add bias
+            a_j = np.append(a_j, np.ones((a_j.shape[0], 1)), axis=1)
+            X = a_j
+            
+        z_k = X @ self.ws[-1]
+        y_hat = np.exp(z_k) / np.sum(np.exp(z_k), axis=0)
+
+        return y_hat                                                                              
 
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
@@ -132,23 +165,45 @@ class SoftmaxModel:
         # A list of gradients.
         # For example, self.grads[0] will be the gradient for the first hidden layer
 
-        W_output = self.ws[1].T                         #[10, 65]
-        W_output_tilde = W_output[:, : -1]              #[10, 64] # Remove the bias from the output layer
-        N = X.shape[0]                                  #Batch size
+        #Before Task 4c:
 
-        y_hat = outputs.T                               #[10, N]
-        y = targets.T                                   #[10, N]
+        # W_output = self.ws[1].T                         #[10, 65]
+        # W_output_tilde = W_output[:, : -1]              #[10, 64] # Remove the bias from the output layer
+        # N = X.shape[0]                                  #Batch size
 
-        delta_output = y_hat - y                                                                    #[10, N]        
-        delta_hidden = (W_output_tilde.T @ delta_output) * self.sigmoid_derivative(self.z_hidden)        #[64, 10] @ [10, N] = [64, N]
+        # y_hat = outputs.T                               #[10, N]
+        # y = targets.T                                   #[10, N]
+
+        # delta_output = y_hat - y                                                                    #[10, N]        
+        # delta_hidden = (W_output_tilde.T @ delta_output) * self.sigmoid_derivative(self.z_hidden)   #[64, 10] @ [10, N] = [64, N]
         
-        gradient_hidden = (delta_hidden @ X) / N                                                    #[64, N] @ [N, 785] = [64, 785]
-        gradient_output = (delta_output @ self.a_hidden.T) / N                                      #[10, N] @ [N, 65] = [10, 65]
+        # gradient_hidden = (delta_hidden @ X) / N                                                    #[64, N] @ [N, 785] = [64, 785]
+        # gradient_output = (delta_output @ self.a_hidden.T) / N                                      #[10, N] @ [N, 65] = [10, 65]
 
-        self.grads[0] = gradient_hidden.T                                                           #[785, 64]
-        self.grads[1] = gradient_output.T                                                           #[65, 10]    
+        # self.grads[0] = gradient_hidden.T                                                           #[785, 64]
+        # self.grads[1] = gradient_output.T                                                           #[65, 10]    
               
+        #Task 4c:
+        #Generalize the backward operation for differnt number of layers
+
+        delta = outputs - targets  # Output layer gradient
+    
+        for i in reversed(range(len(self.ws))):
+            if i == 0:
+                a_prev = X
+            else:
+                a_prev = np.hstack((self.hidden_layer_output[i-1], np.ones((self.hidden_layer_output[i-1].shape[0], 1))))
+
+            # Gradient calculation
+            grad_w = a_prev.T @ delta / X.shape[0]
+            
+            self.grads[i] = grad_w
+
+            if i > 0:
+                # Exclude the bias from weights for delta calculation
+                delta = (delta @ self.ws[i][:-1, :].T) * self.sigmoid_derivative(self.hidden_layer_input[i-1])  
         
+
         
         for grad, w in zip(self.grads, self.ws):
             assert (
@@ -160,6 +215,8 @@ class SoftmaxModel:
 
 
     def sigmoid(self, z: np.ndarray) -> np.ndarray:
+        if self.use_improved_sigmoid:
+            return self.improved_sigmoid(z)
         return 1 / (1 + np.exp(-z))
 
     def improved_sigmoid(self, z: np.ndarray) -> np.ndarray:

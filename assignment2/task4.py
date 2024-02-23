@@ -5,7 +5,7 @@ from task2 import SoftmaxTrainer, calculate_accuracy
 
 def main():
     # hyperparameters DO NOT CHANGE IF NOT SPECIFIED IN ASSIGNMENT TEXT
-    num_epochs = 5
+    num_epochs = 50
     learning_rate = .02  #Edited for 3c
     batch_size = 32
     neurons = [32, 64, 128]
