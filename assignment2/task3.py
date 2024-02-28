@@ -10,7 +10,7 @@ def main():
     learning_rate = .02  #Edited for 3c
     batch_size = 32
     neurons_per_layer = [64, 10]
-    momentum_gamma = .9  # Task 3 hyperparameter
+    momentum_gamma = 0.9  # Task 3 hyperparameter
     shuffle_data = True
 
     use_improved_sigmoid = False
