@@ -35,16 +35,16 @@ def compute_loss_and_accuracy(
 
             # Compute Loss and Accuracy
             loss = loss_criterion(output_probs, Y_batch)
-            losses.append(loss.detach().cpu().item())
+            losses.append(loss)
             
             # Predicted class is the max index over the column dimension
             outputs = torch.argmax(output_probs, dim=1)
             targets = Y_batch
-            accuracy = (outputs == targets).sum().item() / len(targets)
+            accuracy = (outputs == targets).sum() / len(targets)
             accuracies.append(accuracy)
 
-        average_loss = torch.mean(torch.stack(losses)).item()
-        accuracy = torch.mean(torch.stack(accuracies)).item()
+        average_loss = torch.mean(torch.stack(losses))
+        accuracy = torch.mean(torch.stack(accuracies))
     return average_loss, accuracy
 
 
