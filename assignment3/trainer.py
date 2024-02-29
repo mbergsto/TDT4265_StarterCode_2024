@@ -20,10 +20,33 @@ def compute_loss_and_accuracy(
     Returns:
         [average_loss, accuracy]: both scalar.
     """
+    # average_loss = 0
+    # accuracy = 0
+    # losses = []
+    # accuracies = []
+    # # TODO: Implement this function (Task  2a)
+    # with torch.no_grad():
+    #     for (X_batch, Y_batch) in dataloader:
+    #         # Transfer images/labels to GPU VRAM, if possible
+    #         X_batch = utils.to_cuda(X_batch)
+    #         Y_batch = utils.to_cuda(Y_batch)
+    #         # Forward pass the images through our model
+    #         output_probs = model(X_batch)
+
+    #         # Compute Loss and Accuracy
+    #         loss = loss_criterion(output_probs, Y_batch)
+    #         losses.append(loss)
+            
+    #         # Predicted class is the max index over the column dimension
+    #         outputs = torch.argmax(output_probs, dim=1)
+    #         targets = Y_batch
+    #         accuracy = (outputs == targets).sum() / len(targets)
+    #         accuracies.append(accuracy)
+
+    #     average_loss = torch.mean(torch.stack(losses))
+    #     accuracy = torch.mean(torch.stack(accuracies))
     average_loss = 0
     accuracy = 0
-    losses = []
-    accuracies = []
     # TODO: Implement this function (Task  2a)
     with torch.no_grad():
         for (X_batch, Y_batch) in dataloader:
@@ -34,17 +57,18 @@ def compute_loss_and_accuracy(
             output_probs = model(X_batch)
 
             # Compute Loss and Accuracy
-            loss = loss_criterion(output_probs, Y_batch)
-            losses.append(loss)
+            average_loss += loss_criterion(output_probs, Y_batch).item()
+
             
             # Predicted class is the max index over the column dimension
             outputs = torch.argmax(output_probs, dim=1)
             targets = Y_batch
-            accuracy = (outputs == targets).sum() / len(targets)
-            accuracies.append(accuracy)
+            accuracy += (outputs == targets).sum().item() / len(targets)
+    
+    average_loss = average_loss / len(dataloader)
+    accuracy = accuracy / len(dataloader)
 
-        average_loss = torch.mean(torch.stack(losses))
-        accuracy = torch.mean(torch.stack(accuracies))
+
     return average_loss, accuracy
 
 
