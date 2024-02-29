@@ -105,7 +105,7 @@ def create_plots(trainer: Trainer, name: str):
     plt.subplot(1, 2, 1)
     plt.title("Cross Entropy Loss")
     utils.plot_loss(
-        trainer.train_history["loss"], label="Training loss", npoints_to_average=10
+        trainer.train_history["loss"].cpu(), label="Training loss", npoints_to_average=10
     )
     utils.plot_loss(trainer.validation_history["loss"], label="Validation loss")
     plt.legend()
