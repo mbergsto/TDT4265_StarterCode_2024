@@ -7,6 +7,10 @@
 # Icon must end with two \r
 Icon
 
+# Dataset files
+assignment3/data/
+assignment3/data/cifar-10-batches-py/
+assignment3/data/cifar-10-batches-py.tar.gz
 
 # Thumbnails
 ._*
