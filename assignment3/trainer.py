@@ -22,6 +22,8 @@ def compute_loss_and_accuracy(
     """
     average_loss = 0
     accuracy = 0
+    losses = []
+    accuracies = []
     # TODO: Implement this function (Task  2a)
     with torch.no_grad():
         for (X_batch, Y_batch) in dataloader:
@@ -32,8 +34,17 @@ def compute_loss_and_accuracy(
             output_probs = model(X_batch)
 
             # Compute Loss and Accuracy
-
+            loss = loss_criterion(output_probs, Y_batch)
+            losses.append(loss.detach().cpu().item())
+            
             # Predicted class is the max index over the column dimension
+            outputs = torch.argmax(output_probs, dim=1)
+            targets = Y_batch
+            accuracy = (outputs == targets).sum().item() / len(targets)
+            accuracies.append(accuracy)
+
+        average_loss = torch.mean(torch.stack(losses)).item()
+        accuracy = torch.mean(torch.stack(accuracies)).item()
     return average_loss, accuracy
 
 
