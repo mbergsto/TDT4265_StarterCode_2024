@@ -8,6 +8,7 @@
 Icon
 
 # Dataset files
+data/
 assignment3/data/
 assignment3/data/cifar-10-batches-py/
 assignment3/data/cifar-10-batches-py.tar.gz
