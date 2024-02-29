@@ -75,7 +75,6 @@ class ExampleModel(nn.Module):
             nn.ReLU(),
             #Layer 5 - second fully connected layer
             nn.Linear(64, num_classes),
-            #nn.Softmax(dim=1),
         )
 
     def forward(self, x):
