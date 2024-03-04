@@ -4,6 +4,7 @@ import torch
 import typing
 import numpy as np
 import pathlib
+from torchvision import transforms
 np.random.seed(0)
 
 mean = (0.5, 0.5, 0.5)
@@ -17,14 +18,28 @@ def get_data_dir():
     return "data/cifar10"
 
 
+
+
 def load_cifar10(batch_size: int, validation_fraction: float = 0.1
                  ) -> typing.List[torch.utils.data.DataLoader]:
     # Note that transform train will apply the same transform for
     # validation!
-    transform_train = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize(mean, std),
-    ])
+    augment = True
+    if augment: # If augment is True, we add some random transformations to the training data
+        transform_train = transforms.Compose([
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomRotation(5),
+            transforms.RandomCrop(size=32, padding=4),
+            transforms.Resize(32),
+            transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std),
+        ])
+    else:
+        transform_train = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std),
+        ])
     transform_test = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(mean, std)

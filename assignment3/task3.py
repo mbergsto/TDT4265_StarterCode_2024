@@ -64,11 +64,27 @@ class ExampleModel(nn.Module):
             nn.MaxPool2d(
                 kernel_size=kernel_size_else, 
                 stride=2),
-        )   
+            
+            #Layer 4 - third convolutional layer
+            nn.Conv2d(
+                in_channels=512,
+                out_channels=1024,
+                kernel_size = kernel_size_conv,
+                stride=1,
+                padding=1,
+            ),
+            nn.LeakyReLU(),
+            nn.BatchNorm2d(1024),
+            nn.Dropout2d(p=0.05),
+            nn.MaxPool2d(
+                kernel_size=kernel_size_else, 
+                stride=2),
+        )      
 
+        
     
         # Calculate the number of output features
-        self.num_output_features = 512 * 4 * 4
+        self.num_output_features = 1024 * 2 * 2
 
         # There is no need for softmax activation function, as this is
         # included with nn.CrossEntropyLoss
