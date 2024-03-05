@@ -24,7 +24,7 @@ def load_cifar10(batch_size: int, validation_fraction: float = 0.1
                  ) -> typing.List[torch.utils.data.DataLoader]:
     # Note that transform train will apply the same transform for
     # validation!
-    augment = True
+    augment = False
     if augment: # If augment is True, we add some random transformations to the training data
         transform_train = transforms.Compose([
             transforms.RandomHorizontalFlip(),

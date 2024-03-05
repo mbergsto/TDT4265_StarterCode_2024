@@ -90,17 +90,17 @@ class ExampleModel(nn.Module):
         # included with nn.CrossEntropyLoss
         self.classifier = nn.Sequential(
             nn.Flatten(),
-            #Layer 4 - first fully connected layer
+            #Layer 5 - first fully connected layer
             nn.Linear(self.num_output_features, 512),
             nn.LeakyReLU(),
             nn.BatchNorm1d(512),
             nn.Dropout(p=0.05),
-            #Layer 5 - second fully connected layer
+            #Layer 6 - second fully connected layer
             nn.Linear(512, 64),
             nn.LeakyReLU(),
             nn.BatchNorm1d(64),
             nn.Dropout(p=0.05),
-            #Layer 6 - third fully connected layer
+            #Layer 7 - third fully connected layer
             nn.Linear(64, num_classes),
         )
 
@@ -159,7 +159,7 @@ def main():
         batch_size, learning_rate, early_stop_count, epochs, model, dataloaders
     )
     trainer.train()
-    create_plots(trainer, "task3")
+    #create_plots(trainer, "task3")
 
     train_loss, train_accuracy = compute_loss_and_accuracy(trainer.dataloader_train, model, nn.CrossEntropyLoss())
     validation_loss, validation_accuracy = compute_loss_and_accuracy(trainer.dataloader_val, model, nn.CrossEntropyLoss())
