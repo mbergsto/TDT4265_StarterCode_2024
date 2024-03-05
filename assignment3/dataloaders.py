@@ -7,8 +7,8 @@ import pathlib
 from torchvision import transforms
 np.random.seed(0)
 
-mean = (0.5, 0.5, 0.5)
-std = (.25, .25, .25)
+mean=[0.485, 0.456, 0.406]
+std=[0.229, 0.224, 0.225]
 
 
 def get_data_dir():
@@ -18,32 +18,30 @@ def get_data_dir():
     return "data/cifar10"
 
 
-
-
 def load_cifar10(batch_size: int, validation_fraction: float = 0.1
                  ) -> typing.List[torch.utils.data.DataLoader]:
     # Note that transform train will apply the same transform for
     # validation!
-    augment = False
-    if augment: # If augment is True, we add some random transformations to the training data
-        transform_train = transforms.Compose([
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomRotation(5),
-            transforms.RandomCrop(size=32, padding=4),
-            transforms.Resize(32),
-            transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1),
+
+    transform_train = transforms.Compose([
+            transforms.Resize((224, 224)),
             transforms.ToTensor(),
             transforms.Normalize(mean, std),
+            # transforms.RandomHorizontalFlip(),
+            # transforms.RandomRotation(5),
+            # transforms.RandomCrop(size=32, padding=4),
+            # transforms.Resize(32),
+            # transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1),
+            # transforms.ToTensor(),
+            # transforms.Normalize(mean, std),
         ])
-    else:
-        transform_train = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(mean, std),
-        ])
+        
     transform_test = transforms.Compose([
+        transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize(mean, std)
     ])
+    
     data_train = datasets.CIFAR10(get_data_dir(),
                                   train=True,
                                   download=True,
