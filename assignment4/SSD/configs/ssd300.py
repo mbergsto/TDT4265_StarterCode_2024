@@ -10,11 +10,11 @@ from .utils import get_dataset_dir, get_output_dir
 
 
 train = dict(
-    batch_size=32,
+    batch_size= 2, #32,
     amp=True,  # Automatic mixed precision
     log_interval=20,
     seed=0,
-    epochs=50,
+    epochs= 2, #50,
     _output_dir=get_output_dir(),
     imshape=(300, 300),
     image_channels=3
